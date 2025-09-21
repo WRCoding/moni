@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.longjunwang.moni.mapper.ExpenseMapper">
+
+    <resultMap id="recordResultMap" type="com.longjunwang.moni.entity.Expense">
+        <id property="id" column="id" />
+        <result property="date" column="date" />
+        <result property="amount" column="amount" />
+        <result property="type" column="type" />
+        <result property="remark" column="remark" />
+        <result property="subRemark" column="sub_remark" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <!-- 插入记录 - 只插入非空字段 -->
+    <insert id="insertSelective" parameterType="com.longjunwang.moni.entity.Expense">
+        INSERT INTO expense
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="date != null">date,</if>
+            <if test="amount != null">amount,</if>
+            <if test="type != null">type,</if>
+            <if test="remark != null">remark,</if>
+            <if test="subRemark != null">sub_remark,</if>
+            created_at,updated_at
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="date != null">#{date},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="type != null">#{type},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="subRemark != null">#{subRemark},</if>
+            strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime'),strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+        </trim>
+    </insert>
+
+    <!-- 更新记录 - 只更新非空字段 -->
+    <update id="updateSelective" parameterType="com.longjunwang.moni.entity.Expense">
+        UPDATE expense
+        <set>
+            <if test="date != null">date = #{date},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="subRemark != null">sub_remark = #{subRemark},</if>
+            updated_at = strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据记录号删除 -->
+    <delete id="deleteById" parameterType="String">
+        DELETE FROM expense WHERE id = #{id}
+    </delete>
+
+    <!-- 根据记录号查询 -->
+    <select id="selectById" parameterType="String" resultMap="recordResultMap">
+        SELECT * FROM expense WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有记录 -->
+    <select id="selectAll" resultMap="recordResultMap">
+        SELECT * FROM expense
+    </select>
+
+    <!-- 条件查询 -->
+    <select id="selectByCondition" parameterType="com.longjunwang.moni.entity.Expense" resultMap="recordResultMap">
+        SELECT * FROM expense
+        <where>
+            <if test="id != null">AND id = #{id}</if>
+            <if test="date != null">AND date = #{date}</if>
+            <if test="amount != null">AND amount = #{amount}</if>
+            <if test="type != null">AND type = #{type}</if>
+            <if test="remark != null">AND remark LIKE CONCAT('%', #{remark}, '%')</if>
+            <if test="subRemark != null">AND sub_remark LIKE CONCAT('%', #{subRemark}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectByRangeDate" resultMap="recordResultMap">
+        SELECT * FROM expense where date <![CDATA[ >= ]]> #{startTime} and date <![CDATA[ <= ]]> #{endTime};
+    </select>
+<!--CONCAT('%', #{remark}, '%')-->
+    <select id="selectByRangeDateAndRemark" resultMap="recordResultMap">
+        SELECT * FROM expense where date <![CDATA[ >= ]]> #{startTime} and date <![CDATA[ <= ]]> #{endTime} and (remark like CONCAT('%', #{remark}, '%') or sub_remark like CONCAT('%', #{remark}, '%'));
+    </select>
+</mapper>

@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: moni
+  ai:
+    chat:
+      client:
+        enabled: true
+    openai:
+      api-key: ''
+      base-url: ''
+  datasource:
+    url: ''
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: ''
+    password: ''
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+moni:
+  ai:
+    openai:
+      model: gpt-5
+    gemini:
+      model: gemini-2.5-pro
+    deepseek:
+      model: DeepSeek-V3.1
+    claude:
+      model: claude-sonnet-4-20250514
+    intent:
+      model: gpt-5-nano
+    extract:
+      model: Qwen2.5-VL-72B-Instruct
+  image:
+    path: ''
+logging:
+  level:
+    root: info
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+server:
+  port: 7634
