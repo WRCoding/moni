@@ -40,7 +40,6 @@ public class HtmlAgent implements MoniAgent<String, String> {
     }
 
     private UserMessage userMessage(String content){
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(htmlPrompt);
         PromptTemplate promptTemplate = PromptTemplate.builder().resource(htmlPrompt).build();
         Message message = promptTemplate.createMessage(Map.of("markdown_input", content));
         return (UserMessage) message;
