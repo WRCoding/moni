@@ -19,5 +19,8 @@ public interface ExpenseMapper {
     List<Expense> selectByCondition(Expense Expense);
 
     List<Expense> selectByRangeDate(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
     List<Expense> selectByRangeDateAndRemark(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("remark")String remark);
+
+    List<Expense> selectByIds(@Param("ids") List<String> ids);
 }

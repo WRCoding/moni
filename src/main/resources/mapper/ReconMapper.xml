@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.longjunwang.moni.mapper.ReconMapper">
+
+    <resultMap id="BaseResultMap" type="com.longjunwang.moni.entity.Recon">
+        <id column="id" property="id"/>
+        <result column="insert_id" property="insertId"/>
+        <result column="raw" property="raw"/>
+        <result column="status" property="status"/>
+        <result column="created" property="created"/>
+        <result column="updated" property="updated"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, insert_id, raw, status, created, updated
+    </sql>
+
+    <!-- 插入：Selective -->
+    <insert id="insertSelective" parameterType="com.longjunwang.moni.entity.Recon" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO recon
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="insertId != null">insert_id,</if>
+            <if test="raw != null">raw,</if>
+            <if test="status != null">status,</if>
+            <if test="created != null">created,</if>
+            <if test="updated != null">updated,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="insertId != null">#{insertId},</if>
+            <if test="raw != null">#{raw},</if>
+            <if test="status != null">#{status},</if>
+            <if test="created != null">#{created},</if>
+            <if test="updated != null">#{updated},</if>
+        </trim>
+    </insert>
+
+    <!-- 更新：Selective -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.longjunwang.moni.entity.Recon">
+        UPDATE recon
+        <set>
+            <if test="insertId != null">insert_id = #{insertId},</if>
+            <if test="raw != null">raw = #{raw},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="created != null">created = #{created},</if>
+            <if test="updated != null">updated = #{updated},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteByPrimaryKey" parameterType="int">
+        DELETE FROM recon WHERE id = #{id}
+    </delete>
+
+    <!-- 查询单条 -->
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="int">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recon
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recon
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recon where status = #{status}
+    </select>
+
+</mapper>

@@ -42,7 +42,7 @@ public class ExpenseAgent implements MoniAgent<AgentContext, String> {
     @Override
     public String submitAgent(AgentContext agentContext) {
         SystemPromptTemplate spt = new SystemPromptTemplate(expensePrompt);
-        Message sysMsg = spt.createMessage(Map.of("id", idGenerate()));
+        Message sysMsg = spt.createMessage(Map.of("id", agentContext.getInsertId()));
         UserMessage userMsg = new UserMessage(agentContext.getContent());
         String result = openAIChatClient.prompt(new Prompt(List.of(sysMsg, userMsg)))
                 .tools(this)

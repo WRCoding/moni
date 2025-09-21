@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentContext {
+    private String insertId;
     private String intent;
     private String content;
 }

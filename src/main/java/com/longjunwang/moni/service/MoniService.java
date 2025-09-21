@@ -1,14 +1,20 @@
 package com.longjunwang.moni.service;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.longjunwang.moni.agent.*;
 import com.longjunwang.moni.entity.AgentContext;
 import com.longjunwang.moni.entity.MoniMsg;
+import com.longjunwang.moni.entity.Recon;
 import com.longjunwang.moni.enums.IntentEnum;
+import com.longjunwang.moni.mapper.ReconMapper;
+import com.longjunwang.moni.util.IdGenerator;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 @Slf4j
@@ -33,6 +39,9 @@ public class MoniService {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private ReconMapper reconMapper;
+
     @Value("${spring.mail.username}")
     private String to;
 
@@ -43,7 +52,7 @@ public class MoniService {
         String intent = agentContext.getIntent();
         log.info("intent {}", agentContext);
         if (IntentEnum.INSERT.name().equals(intent)) {
-            return expenseAgent.submitAgent(agentContext);
+            return handleInsert(agentContext);
         }
 
         if (IntentEnum.ANALYZE.name().equals(intent)) {
@@ -54,6 +63,21 @@ public class MoniService {
 
         return OTHER_MSG;
 
+    }
+
+    private String handleInsert(AgentContext agentContext) {
+        try {
+            String id = IdGenerator.generateId();
+            agentContext.setInsertId(id);
+            Recon recon = new Recon();
+            recon.setInsertId(id);
+            recon.setRaw(JSONObject.toJSONString(agentContext));
+            reconMapper.insertSelective(recon);
+            return expenseAgent.submitAgent(agentContext);
+        } catch (Exception e) {
+            log.error("handleInsert", e);
+            return "handleInsert" + e.getMessage();
+        }
     }
 
     private AgentContext classifyIntent(MoniMsg message) {

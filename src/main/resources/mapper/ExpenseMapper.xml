@@ -85,4 +85,10 @@
     <select id="selectByRangeDateAndRemark" resultMap="recordResultMap">
         SELECT * FROM expense where date <![CDATA[ >= ]]> #{startTime} and date <![CDATA[ <= ]]> #{endTime} and (remark like CONCAT('%', #{remark}, '%') or sub_remark like CONCAT('%', #{remark}, '%'));
     </select>
+    <select id="selectByIds" resultMap="recordResultMap">
+        select * from expense where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>
