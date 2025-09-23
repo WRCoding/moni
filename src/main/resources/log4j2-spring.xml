@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <!-- 日志文件目录 -->
+        <Property name="LOG_PATH">logs</Property>
+        <!-- 日志文件名称前缀 -->
+        <Property name="APP_NAME">moni</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%p] [%t] %c{1} - %m%n" />
+        </Console>
+
+        <!-- 按天归档的滚动文件 -->
+        <RollingFile name="RollingFile" fileName="${LOG_PATH}/${APP_NAME}.log"
+                     filePattern="${LOG_PATH}/archive/${APP_NAME}-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%p] [%t] %c{1} - %m%n" />
+            <Policies>
+                <!-- 按天切分 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- root 日志 -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
