@@ -8,6 +8,15 @@ spring:
     openai:
       api-key: ''
       base-url: ''
+    mcp:
+      server:
+        name: moni-mcp-server
+        version: 1.0.0
+        type: sync
+        sse-message-endpoint: /moni/mcp/messages
+        capabilities:
+          tool: true
+        sse-endpoint: /moni/sse
   datasource:
     url: ''
   mail:
