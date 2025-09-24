@@ -5,14 +5,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @Slf4j
@@ -32,12 +40,11 @@ public class DataSourceConfig {
                 log.info("dbPath不存在,将自动创建, dbPath: {}", dbPath);
                 dbFile.getParentFile().mkdirs();
                 dbFile.createNewFile();
-                initializeDatabase(dbPath);
             } catch (IOException e) {
                 throw new RuntimeException("无法创建数据库文件", e);
             }
         }
-
+        initializeDatabase(dbPath);
         return DataSourceBuilder.create()
                 .url(dbUrl)
                 .driverClassName("org.sqlite.JDBC")
@@ -47,37 +54,42 @@ public class DataSourceConfig {
     private void initializeDatabase(String dbPath) {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
              Statement stmt = conn.createStatement()) {
-            String tableSQl = """
-                    create table expense
-                    (
-                        id         TEXT not null
-                            primary key,
-                        date       TEXT not null,
-                        amount     TEXT not null,
-                        type       TEXT not null,
-                        remark     TEXT,
-                        sub_remark TEXT,
-                        created_at TIMESTAMP default CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP default CURRENT_TIMESTAMP
-                    );
-                    CREATE TABLE recon
-                    (
-                        id        INTEGER PRIMARY KEY AUTOINCREMENT,       -- 主键ID
-                        insert_id TEXT NOT NULL,                           -- 插入人标识(字符串)
-                        raw       TEXT NOT NULL,                           -- 原始对账数据(JSON 字符串)
-                        status    TEXT NOT NULL DEFAULT 'INIT',            -- 状态: INIT=待处理, SUCCESS=成功, FAIL=失败
-                        created   TIMESTAMP      DEFAULT CURRENT_TIMESTAMP, -- 创建时间
-                        updated   TIMESTAMP      DEFAULT CURRENT_TIMESTAMP  -- 更新时间
-                    );
-                    
-                    
-                        
-                    """;
-            // 执行建表SQL
-            stmt.executeUpdate(tableSQl);
-            // 可以添加更多表或初始化数据
-        } catch (SQLException e) {
+            for (String statementSql : loadSqlStatements("sql/db.sql")) {
+                stmt.executeUpdate(statementSql);
+            }
+            log.info("数据库初始化完成");
+        } catch (IOException | SQLException e) {
             throw new RuntimeException("初始化数据库失败", e);
         }
+    }
+
+    private List<String> loadSqlStatements(String resourcePath) throws IOException {
+        ClassPathResource resource = new ClassPathResource(resourcePath);
+        if (resource.exists()) {
+            try (InputStream inputStream = resource.getInputStream()) {
+                return splitSqlStatements(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            }
+        }
+
+        Path path = Paths.get(resourcePath);
+        if (!Files.exists(path)) {
+            path = Paths.get(System.getProperty("user.dir"), resourcePath);
+        }
+        if (!Files.exists(path)) {
+            throw new IOException("SQL 资源文件不存在: " + resourcePath);
+        }
+
+        return splitSqlStatements(Files.readString(path, StandardCharsets.UTF_8));
+    }
+
+    private List<String> splitSqlStatements(String sqlContent) {
+        List<String> statements = new ArrayList<>();
+        for (String statement : sqlContent.split(";")) {
+            String trimmed = statement.trim();
+            if (!trimmed.isEmpty()) {
+                statements.add(trimmed);
+            }
+        }
+        return statements;
     }
 }
