@@ -32,17 +32,24 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        final String uri = request.getRequestURI();
+
+        // 1) 绕过 SSE / 其他需要长连接的端点
+        if (uri.endsWith("/moni/sse") || uri.equals("/moni/mcp/messages")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
         try {
+            filterChain.doFilter(wrappedRequest, wrappedResponse);
+        } finally {
             try {
                 captureAndPersist(wrappedRequest, wrappedResponse);
             } catch (Exception ex) {
                 log.debug("Skip request logging due to error: {}", ex.getMessage());
             }
-            filterChain.doFilter(wrappedRequest, wrappedResponse);
-        } finally {
-            wrappedResponse.copyBodyToResponse();
         }
     }
 

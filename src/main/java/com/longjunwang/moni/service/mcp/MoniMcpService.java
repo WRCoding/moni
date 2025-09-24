@@ -8,6 +8,8 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -16,6 +18,11 @@ public class MoniMcpService {
 
     @Autowired
     private ExpenseMapper expenseMapper;
+
+    @Tool(description = "获取当前日期,格式为yyyy-MM-dd,如果没有指定日期,可以通过该方法获取当前日期,并以当前日期为基准")
+    public String getCurrentDay(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
 
     @Tool(description = "获取指定范围的花费记录,如果没有明确的范围,默认为最近一个星期")
     public List<Expense> getExpense(@ToolParam(description = "范围的起始时间,包含这天,时间格式转换为YYYY-mm-dd日 例如2025-03-01") String startTime,
