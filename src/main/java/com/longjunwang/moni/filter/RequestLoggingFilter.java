@@ -50,6 +50,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             } catch (Exception ex) {
                 log.debug("Skip request logging due to error: {}", ex.getMessage());
             }
+            wrappedResponse.copyBodyToResponse();
         }
     }
 

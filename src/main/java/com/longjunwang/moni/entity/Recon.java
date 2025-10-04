@@ -7,6 +7,7 @@ public class Recon {
     private Integer id;
     private String insertId;
     private String raw;
+    private String encryptId;
     private String status;
     private String created;
     private String updated;

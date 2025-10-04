@@ -41,4 +41,9 @@ public class MoniController {
                     .body("文件上传失败" + e.getMessage());
         }
     }
+
+    @PostMapping("/recon")
+    public ResponseEntity<String> recon(MultipartFile file) {
+        return ResponseEntity.ok(fileService.recon(file));
+    }
 }

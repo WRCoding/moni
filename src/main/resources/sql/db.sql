@@ -10,15 +10,19 @@ CREATE TABLE IF NOT EXISTS expense
     created_at TIMESTAMP default CURRENT_TIMESTAMP,
     updated_at TIMESTAMP default CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS recon
+create table if not exists recon
 (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,       -- 主键ID
-    insert_id TEXT NOT NULL,                           -- 插入人标识(字符串)
-    raw       TEXT NOT NULL,                           -- 原始对账数据(JSON 字符串)
-    status    TEXT NOT NULL DEFAULT 'INIT',            -- 状态: INIT=待处理, SUCCESS=成功, FAIL=失败
-    created   TIMESTAMP      DEFAULT CURRENT_TIMESTAMP, -- 创建时间
-    updated   TIMESTAMP      DEFAULT CURRENT_TIMESTAMP  -- 更新时间
+    id         INTEGER
+        primary key autoincrement,
+    insert_id  TEXT                     not null,
+    raw        TEXT                     not null,
+    encrypt_id TEXT,
+    status     TEXT      default 'INIT' not null,
+    created    TIMESTAMP default CURRENT_TIMESTAMP,
+    updated    TIMESTAMP default CURRENT_TIMESTAMP
 );
+
+
 CREATE TABLE IF NOT EXISTS request_log
 (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,

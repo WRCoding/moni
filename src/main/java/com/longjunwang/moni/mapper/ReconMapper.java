@@ -20,4 +20,6 @@ public interface ReconMapper {
     List<Recon> selectAll();
 
     List<Recon> selectByStatus(@Param("status") String status);
+
+    List<Recon> selectByDate(@Param("date") String date);
 }

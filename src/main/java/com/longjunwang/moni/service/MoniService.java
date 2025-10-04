@@ -7,6 +7,8 @@ import com.longjunwang.moni.entity.MoniMsg;
 import com.longjunwang.moni.entity.Recon;
 import com.longjunwang.moni.enums.IntentEnum;
 import com.longjunwang.moni.mapper.ReconMapper;
+import com.longjunwang.moni.util.DateUtil;
+import com.longjunwang.moni.util.Encrypt;
 import com.longjunwang.moni.util.IdGenerator;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +73,10 @@ public class MoniService {
             agentContext.setInsertId(id);
             Recon recon = new Recon();
             recon.setInsertId(id);
+            recon.setEncryptId(Encrypt.encrypt(agentContext.getContent()));
             recon.setRaw(JSONObject.toJSONString(agentContext));
+            recon.setCreated(DateUtil.getCurrentDateTime());
+            recon.setUpdated(DateUtil.getCurrentDateTime());
             reconMapper.insertSelective(recon);
             return expenseAgent.submitAgent(agentContext);
         } catch (Exception e) {

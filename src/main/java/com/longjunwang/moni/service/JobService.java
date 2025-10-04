@@ -2,6 +2,7 @@ package com.longjunwang.moni.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.longjunwang.moni.agent.AnalyseAgent;
+import com.longjunwang.moni.agent.ClassifyIntentAgent;
 import com.longjunwang.moni.agent.ExpenseAgent;
 import com.longjunwang.moni.agent.HtmlAgent;
 import com.longjunwang.moni.entity.AgentContext;
@@ -21,6 +22,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+
+import static com.longjunwang.moni.enums.IntentEnum.INSERT;
 
 @Component
 @Slf4j
@@ -43,10 +46,13 @@ public class JobService {
     @Autowired
     private ExpenseAgent expenseAgent;
 
+    @Autowired
+    private ClassifyIntentAgent classifyIntentAgent;
+
     @Value("${spring.mail.username}")
     private String to;
 
-    private static final String QUERY = "帮我分析一下昨天和前天的花销";
+    private static final String QUERY = "先帮我分析总结一下昨天的花销,然后再跟前天的花销进行对比";
     private static final String ANALYSE_OBJECT = "总结";
     private static final String RECON_OBJECT = "对账总结";
 
@@ -85,30 +91,43 @@ public class JobService {
         int count = 0;
         int failedCount = 0;
         int successCount = 0;
+        int invalidCount = 0;
         for (Recon recon : needRecons) {
             count++;
             AgentContext agentContext = JSONObject.parseObject(recon.getRaw(), AgentContext.class);
-            expenseAgent.submitAgent(agentContext);
-            Expense expense = expenseMapper.selectById(recon.getInsertId());
-            if (Objects.isNull(expense)) {
-                failedCount++;
-                Recon update = new Recon();
-                update.setId(recon.getId());
-                update.setStatus(ReconStatus.FAILED.name());
-                reconMapper.updateByPrimaryKeySelective(update);
+            AgentContext agent = classifyIntentAgent.submitAgent(agentContext.getContent());
+            if (INSERT.name().equals(agent.getIntent())) {
+                expenseAgent.submitAgent(agentContext);
+                Expense expense = expenseMapper.selectById(recon.getInsertId());
+                if (Objects.isNull(expense)) {
+                    failedCount++;
+                    Recon update = new Recon();
+                    update.setId(recon.getId());
+                    update.setStatus(ReconStatus.FAILED.name());
+                    reconMapper.updateByPrimaryKeySelective(update);
+                } else {
+                    successCount++;
+                    Recon update = new Recon();
+                    update.setId(recon.getId());
+                    update.setStatus(ReconStatus.SUCCESS.name());
+                    reconMapper.updateByPrimaryKeySelective(update);
+                }
             } else {
-                successCount++;
+                invalidCount++;
                 Recon update = new Recon();
                 update.setId(recon.getId());
-                update.setStatus(ReconStatus.SUCCESS.name());
+                update.setStatus(ReconStatus.INVALID.name());
                 reconMapper.updateByPrimaryKeySelective(update);
             }
+
+
         }
         String sb = "日期: " +
                 todayStr +
                 ", 需要对账的数量： " +
                 count +
-                ", 成功: " + successCount + ", 失败: " + failedCount;
+                ", 成功: " + successCount + ", 失败: " + failedCount +
+                ", 非法: " + invalidCount;
         mailService.sendSimpleMail(to, RECON_OBJECT, sb);
         log.info("cronTask end");
     }

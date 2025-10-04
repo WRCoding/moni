@@ -9,13 +9,14 @@
         <id column="id" property="id"/>
         <result column="insert_id" property="insertId"/>
         <result column="raw" property="raw"/>
+        <result column="encrypt_id" property="encryptId"/>
         <result column="status" property="status"/>
         <result column="created" property="created"/>
         <result column="updated" property="updated"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, insert_id, raw, status, created, updated
+        id, insert_id, raw, encrypt_id, status, created, updated
     </sql>
 
     <!-- 插入：Selective -->
@@ -24,6 +25,7 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="insertId != null">insert_id,</if>
             <if test="raw != null">raw,</if>
+            <if test="encryptId != null">encrypt_id,</if>
             <if test="status != null">status,</if>
             <if test="created != null">created,</if>
             <if test="updated != null">updated,</if>
@@ -31,6 +33,7 @@
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="insertId != null">#{insertId},</if>
             <if test="raw != null">#{raw},</if>
+            <if test="encryptId != null">#{encryptId},</if>
             <if test="status != null">#{status},</if>
             <if test="created != null">#{created},</if>
             <if test="updated != null">#{updated},</if>
@@ -43,6 +46,7 @@
         <set>
             <if test="insertId != null">insert_id = #{insertId},</if>
             <if test="raw != null">raw = #{raw},</if>
+            <if test="encryptId != null">encrypt_id = #{encryptId},</if>
             <if test="status != null">status = #{status},</if>
             <if test="created != null">created = #{created},</if>
             <if test="updated != null">updated = #{updated},</if>
@@ -72,6 +76,10 @@
     <select id="selectByStatus" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM recon where status = #{status}
+    </select>
+    <select id="selectByDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recon where strftime('%Y-%m-%d',created) = #{date}
     </select>
 
 </mapper>
