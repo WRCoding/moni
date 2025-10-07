@@ -82,7 +82,6 @@ public class FileService {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
-                log.info("recon line: {}", line);
                 String[] split = line.split("@");
                 var encryptId = split[0];
                 var content = split[1];
