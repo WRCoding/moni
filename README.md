@@ -132,20 +132,9 @@ curl -X POST http://localhost:7634/file \
 
 所有 Agent 持有独立的 `ChatClient` Bean，可通过环境变量切换模型（OpenAI、Claude、DeepSeek、Gemini 等）。
 
-## 测试与验证
-运行单元与集成测试：
-```bash
-mvn clean test
-```
-
-建议在提交前自查：
-1. `mvn -U clean test`
-2. 通过 `/ai` 与 `/file` 进行一次端到端测试
-3. 检查邮件发送日志，确认 SMTP 配置生效
 
 ## 其他注意事项
 - 真实 API Key、邮箱密码等敏感信息请改用环境变量传递，不要提交到 Git。
 - 图片上传目录默认在仓库内，生产环境可改为共享存储并确保应用具有写权限。
 - 若需要清理票据或重跑对账，只删除文件或数据库记录即可，任务会在下一次调度时自动追补。
 
-如需更多贡献说明，请参见 `AGENTS.md` 中的仓库约定。

@@ -31,14 +31,14 @@ public class AnalyseAgent implements MoniAgent<AgentContext, String> {
     private Resource analysePrompt;
 
     @Autowired
-    private ChatClient openAIChatClient;
+    private ChatClient deepSeekChatClient;
 
     @Autowired
     private ExpenseMapper expenseMapper;
 
     @Override
     public String submitAgent(AgentContext agentContext) {
-        String content = openAIChatClient.prompt(new Prompt(List.of(sysMsg(), new UserMessage(agentContext.getContent()))))
+        String content = deepSeekChatClient.prompt(new Prompt(List.of(sysMsg(), new UserMessage(agentContext.getContent()))))
                 .tools(this)
                 .advisors(new SimpleLoggerAdvisor())
                 .call()
