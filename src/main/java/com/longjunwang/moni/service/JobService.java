@@ -65,7 +65,7 @@ public class JobService {
             String answer = analyseAgent.submitAgent(AgentContext.builder().content(QUERY).build());
             String result = htmlAgent.submitAgent(answer);
             mailService.sendMimeMail(to, ANALYSE_OBJECT, result);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             mailService.sendSimpleMail(to, ANALYSE_OBJECT, e.getMessage());
         } finally {
             log.info("analyseTask end");
@@ -123,8 +123,8 @@ public class JobService {
 
         }
         String sb = "日期: " +
-                todayStr +
-                ", 需要对账的数量： " +
+                todayStr + ", 总数量: " + recons.size() +
+                ", 需要对账的数量: " +
                 count +
                 ", 成功: " + successCount + ", 失败: " + failedCount +
                 ", 非法: " + invalidCount;
