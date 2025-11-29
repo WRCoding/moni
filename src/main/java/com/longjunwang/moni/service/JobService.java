@@ -53,11 +53,24 @@ public class JobService {
     private String to;
 
     private static final String QUERY = "先帮我分析总结一下昨天的花销,然后再跟前天的花销进行对比";
+    private static final String LAST_WEEK_QUERY = "帮我分析总结一下我上周一共花费了多少";
     private static final String ANALYSE_OBJECT = "总结";
     private static final String RECON_OBJECT = "对账总结";
 
-    // CRON 表达式（Spring 风格，6 位：秒 分 时 日 月 周）
-    // 每天 02:00 触发
+    @Scheduled(cron = "0 0 6 * * MON", zone = "Asia/Shanghai")
+    public void analyseLastWeekTask(){
+        try {
+            log.info("analyseLastWeekTask start");
+            String answer = analyseAgent.submitAgent(AgentContext.builder().content(LAST_WEEK_QUERY).build());
+            String result = htmlAgent.submitAgent(answer);
+            mailService.sendMimeMail(to, ANALYSE_OBJECT, result);
+        } catch (Exception e) {
+            mailService.sendSimpleMail(to, ANALYSE_OBJECT, e.getMessage());
+        } finally {
+            log.info("analyseLastWeekTask end");
+        }
+    }
+
     @Scheduled(cron = "0 0 6 * * *", zone = "Asia/Shanghai")
     public void analyseTask() {
         try {

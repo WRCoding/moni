@@ -31,14 +31,14 @@ public class AnalyseAgent implements MoniAgent<AgentContext, String> {
     private Resource analysePrompt;
 
     @Autowired
-    private ChatClient deepSeekChatClient;
+    private ChatClient openAIChatClient;
 
     @Autowired
     private ExpenseMapper expenseMapper;
 
     @Override
     public String submitAgent(AgentContext agentContext) {
-        String content = deepSeekChatClient.prompt(new Prompt(List.of(sysMsg(), new UserMessage(agentContext.getContent()))))
+        String content = openAIChatClient.prompt(new Prompt(List.of(sysMsg(), new UserMessage(agentContext.getContent()))))
                 .tools(this)
                 .advisors(new SimpleLoggerAdvisor())
                 .call()
@@ -55,6 +55,16 @@ public class AnalyseAgent implements MoniAgent<AgentContext, String> {
     @Tool(description = "获取消费记录")
     public List<Expense> getExpense(@ToolParam(description = "范围的起始时间,包含这天,时间格式转换为YYYY-mm-dd日 例如2025-03-01") String startTime,
                                     @ToolParam(description = "范围的终止时间,不包含这天,时间格式转换为YYYY-mm-dd日 例如2025-03-10") String endTime) {
+        return expenseMapper.selectByRangeDate(startTime, endTime);
+    }
+
+    @Tool(description = "获取上个星期的消费记录")
+    public List<Expense> getLastWeekExpense() {
+        LocalDate lastWeek = LocalDate.now().minusWeeks(1);
+        LocalDate lastDay = LocalDate.now().minusDays(1);
+        String startTime = lastWeek.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String endTime = lastDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        log.info("getLastWeekExpense start: {}, end: {}", startTime, endTime);
         return expenseMapper.selectByRangeDate(startTime, endTime);
     }
 
