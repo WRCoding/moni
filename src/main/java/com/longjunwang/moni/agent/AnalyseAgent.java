@@ -11,6 +11,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +32,18 @@ public class AnalyseAgent implements MoniAgent<AgentContext, String> {
     private Resource analysePrompt;
 
     @Autowired
-    private ChatClient openAIChatClient;
+    private ChatClient deepSeekChatClient;
 
     @Autowired
     private ExpenseMapper expenseMapper;
 
+    @Autowired
+    private ToolCallbackProvider  toolCallbackProvider;
+
     @Override
     public String submitAgent(AgentContext agentContext) {
-        String content = openAIChatClient.prompt(new Prompt(List.of(sysMsg(), new UserMessage(agentContext.getContent()))))
-                .tools(this)
+        String content = deepSeekChatClient.prompt(new Prompt(List.of(sysMsg(), new UserMessage(agentContext.getContent()))))
+                .toolCallbacks(toolCallbackProvider)
                 .advisors(new SimpleLoggerAdvisor())
                 .call()
                 .content();
@@ -52,21 +56,7 @@ public class AnalyseAgent implements MoniAgent<AgentContext, String> {
 
     }
 
-    @Tool(description = "获取消费记录")
-    public List<Expense> getExpense(@ToolParam(description = "范围的起始时间,包含这天,时间格式转换为YYYY-mm-dd日 例如2025-03-01") String startTime,
-                                    @ToolParam(description = "范围的终止时间,不包含这天,时间格式转换为YYYY-mm-dd日 例如2025-03-10") String endTime) {
-        return expenseMapper.selectByRangeDate(startTime, endTime);
-    }
 
-    @Tool(description = "获取上个星期的消费记录")
-    public List<Expense> getLastWeekExpense() {
-        LocalDate lastWeek = LocalDate.now().minusWeeks(1);
-        LocalDate lastDay = LocalDate.now().minusDays(1);
-        String startTime = lastWeek.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String endTime = lastDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        log.info("getLastWeekExpense start: {}, end: {}", startTime, endTime);
-        return expenseMapper.selectByRangeDate(startTime, endTime);
-    }
 
     private SystemMessage sysMsg(){
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(analysePrompt);

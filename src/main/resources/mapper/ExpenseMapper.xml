@@ -79,7 +79,7 @@
     </select>
 
     <select id="selectByRangeDate" resultMap="recordResultMap">
-        SELECT * FROM expense where date <![CDATA[ >= ]]> #{startTime} and date <![CDATA[ <= ]]> #{endTime};
+        SELECT * FROM expense where date <![CDATA[ >= ]]> #{startTime} and date <![CDATA[ <= ]]> #{endTime} order by cast(amount as real) desc;
     </select>
 <!--CONCAT('%', #{remark}, '%')-->
     <select id="selectByRangeDateAndRemark" resultMap="recordResultMap">
